@@ -25,6 +25,9 @@ env/
 # Logs
 *.log
 
+# Diagnostic Tools
+check_db.py
+
 # Distribution / packaging
 dist/
 build/
