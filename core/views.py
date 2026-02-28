@@ -41,6 +41,9 @@ class AttendanceListCreateView(views.APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        from datetime import date
+        today = date.today().isoformat()
+        
         data = request.data
         if not isinstance(data, list):
             data = [data]
@@ -48,16 +51,23 @@ class AttendanceListCreateView(views.APIView):
         results = []
         for item in data:
             emp_id = item.get('employee_id')
-            date = item.get('date')
+            date_val = item.get('date')
             status_val = item.get('status')
             
-            if not all([emp_id, date, status_val]):
+            if not all([emp_id, date_val, status_val]):
                 continue
+            
+            # Restrict update to today only
+            if date_val != today:
+                return Response(
+                    {"error": f"You can only mark attendance for today ({today}). Past or future updates are restricted."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
                 
             employee = get_object_or_404(Employee, employee_id=emp_id)
             attendance, created = Attendance.objects.update_or_create(
                 employee=employee,
-                date=date,
+                date=date_val,
                 defaults={'status': status_val}
             )
             results.append(AttendanceSerializer(attendance).data)
