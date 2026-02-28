@@ -7,3 +7,4 @@ psycopg2-binary
 requests
 pytest
 pytest-django
+gunicorn
